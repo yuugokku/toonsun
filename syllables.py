@@ -114,8 +114,11 @@ def _into_syllables(text):
             if s[start:start+2] in istugoa_mgt + kokia_mgt:
                 syls_.append(head_c + s[start:])
             else:
-                syls_.append(head_c + s[start:start+1])
-                syls_.append(s[start+1:])
+                if s[-1] in ktt:
+                    syls_.append(head_c + s[start:start+1])
+                    syls_.append(s[start+1:])
+                else:
+                    syls_.append(head_c + s[start:])
         else:
             syls_.append(s)
     return syls_
