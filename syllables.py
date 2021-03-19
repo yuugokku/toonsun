@@ -105,7 +105,7 @@ def _into_syllables(text):
         syls += [syl]
     syls_ = []
     for s in syls:
-        if count_vowels(s) == 3:
+        if count_vowels(s) >= 3:
             head_c, _, _ = decompose(s)
             start = len(head_c)
             i = start
@@ -117,7 +117,10 @@ def _into_syllables(text):
                 if s[i] in mgt and s[i+1] in ktt:
                     break
                 i += 1
-            parts = (s[start:i], s[i:])
+            if count_vowels(s) == 3:
+                parts = (s[start:i], s[i:])
+            else:
+                parts = (s[start:i], s[i:i+2], s[i+2:])
             for part in parts:
                 if part != "":
                     syls_.append(head_c + part)
