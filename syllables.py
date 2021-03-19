@@ -20,6 +20,7 @@ two_ktt = [
     ("ty", "!"), ("dy", "#"), ("ts", "@"),
     ("ch", "c"), ("sy", "$"), ("ny", "="),
     ("ky", "-"), ("gy", "^"), ("hy", "~"),
+    ("x", "ks"), # xは/ks/と等価
 ]
 
 def encode(text):
@@ -52,13 +53,6 @@ def count_vowels(text):
     cnt = 0
     for c in text:
         if c in fecher_mgt:
-            cnt += 1
-    return cnt
-    
-def count_cons(text):
-    cnt = 0
-    for c in text:
-        if c in get_ktt():
             cnt += 1
     return cnt
 
