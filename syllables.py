@@ -1,5 +1,3 @@
-import re
-
 # ユーゴック語の音素情報
 # 短母音
 fecher_mgt = ["a", "i", "u", "e", "o"]
