@@ -105,9 +105,11 @@ def _into_syllables(text):
         syls += [syl]
     syls_ = []
     for s in syls:
-        if count_vowels(s) >= 3:
-            i = 1
-            while len(s) - 2 < i:
+        if count_vowels(s) == 3:
+            head_c, _, _ = decompose(s)
+            start = len(head_c)
+            i = start
+            while len(s) - 1 > i:
                 if s[i:i+2] in kokia_mgt:
                     break
                 if s[i:i+2] in istugoa_mgt:
@@ -115,8 +117,7 @@ def _into_syllables(text):
                 if s[i] in mgt and s[i+1] in ktt:
                     break
                 i += 1
-            head_c = s[0]
-            parts = (s[1:i], s[i:i+2], s[i+2:])
+            parts = (s[start:i], s[i:])
             for part in parts:
                 if part != "":
                     syls_.append(head_c + part)
