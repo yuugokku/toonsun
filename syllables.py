@@ -118,7 +118,10 @@ def _into_syllables(text):
                     break
                 i += 1
             if count_vowels(s) == 3:
-                parts = (s[start:i], s[i:])
+                if start == i:
+                    parts = (s[start:i+2], s[i+2:])
+                else:
+                    parts = (s[start:i], s[i:])
             else:
                 parts = (s[start:i], s[i:i+2], s[i+2:])
             for part in parts:
