@@ -1,3 +1,5 @@
+import re
+
 # ユーゴック語の音素情報
 # 短母音
 fecher_mgt = ["a", "i", "u", "e", "o"]
@@ -24,7 +26,6 @@ two_ktt = [
 
 def encode(text):
     cvted = text.\
-        replace(" ", "").\
         replace(".","").\
         replace(",", ".").\
         replace("'", "")
@@ -80,32 +81,42 @@ def into_syllables(text, encoded=True):
         syl = text[s:e]
         syls += [syl]
     syls_ = []
-    for s in syls:
-        if count_vowels(s) >= 3:
-            i = 1
-            while len(s) - 2 < i:
-                if s[i:i+2] in kokia_mgt:
-                    break
-                if s[i:i+2] in istugoa_mgt:
-                    break
-                if s[i] in mgt and s[i+1] in ktt:
-                    break
-                i += 1
-            head_c = s[0]
-            parts = (s[1:i], s[i:i+2], s[i+2:])
-            for part in parts:
-                if part != "":
-                    syls_.append(head_c + part)
-                    head_c = ""
-        elif count_vowels(s) == 2:
-            head_c = s[0]
-            if s[-1] in ktt and s[1:3] not in kokia_mgt + istugoa_mgt:
-                syls_.append(s[0:2])
-                syls_.append(s[2:])
+    for syl in syls:
+        joint = [syl]
+        if " " in syl:
+            joint = []
+            start = 0
+            for i in range(1, len(syl)-1):
+                if syl[i-1] in mgt and syl[i] == " " and syl[i+1] in mgt:
+                    joint.append(syl[start:i])
+                    start = i + 1
+            joint.append(syl[start:-1])
+        for s in joint:
+            if count_vowels(s) >= 3:
+                i = 1
+                while len(s) - 2 < i:
+                    if s[i:i+2] in kokia_mgt:
+                        break
+                    if s[i:i+2] in istugoa_mgt:
+                        break
+                    if s[i] in mgt and s[i+1] in ktt:
+                        break
+                    i += 1
+                head_c = s[0]
+                parts = (s[1:i], s[i:i+2], s[i+2:])
+                for part in parts:
+                    if part != "":
+                        syls_.append(head_c + part)
+                        head_c = ""
+            elif count_vowels(s) == 2:
+                head_c = s[0]
+                if s[-1] in ktt and s[1:3] not in kokia_mgt + istugoa_mgt:
+                    syls_.append(s[0:2])
+                    syls_.append(s[2:])
+                else:
+                    syls_.append(s)
             else:
                 syls_.append(s)
-        else:
-            syls_.append(s)
     if encoded:
         return syls_
     else:
