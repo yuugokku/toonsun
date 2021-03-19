@@ -23,14 +23,25 @@ two_ktt = [
 ]
 
 def encode(text):
-    cvted = text.\
+    text = text.\
+        strip().\
         replace(".","").\
         replace(",", ".").\
         replace("'", "")
     for k in two_ktt:
-        cvted = cvted.replace(k[0], k[1])
-    return cvted 
-    
+        text = text.replace(k[0], k[1])
+    cvted = ""
+    for i in range(len(text)):
+        to_add = ""
+        if text[i] == " ":
+            if text[i-1] in fecher_mgt and \
+                text[i+1] in fecher_mgt:
+                to_add = ","
+        else:
+            to_add = text[i]
+        cvted += to_add
+    return cvted
+
 def decode(text):
     cvted = text
     for k in two_ktt:
@@ -50,9 +61,7 @@ def get_ktt():
         ktt.append(k[1])
     return ktt
 
-def into_syllables(text, encoded=True):
-    text = text.lower()
-    text = encode(text)
+def _into_syllables(text):
     mgt = fecher_mgt
     ktt = one_ktt
     for k in two_ktt:
@@ -76,50 +85,50 @@ def into_syllables(text, encoded=True):
     syls = []
     for i in range(len(loc) - 1):
         s, e = loc[i], loc[i+1]
-        syl = text[s:e]
+        syl = text[s:e].strip()
         syls += [syl]
     syls_ = []
-    for syl in syls:
-        joint = [syl]
-        if " " in syl:
-            joint = []
-            start = 0
-            for i in range(1, len(syl)-1):
-                if syl[i-1] in mgt and syl[i] == " " and syl[i+1] in mgt:
-                    joint.append(syl[start:i])
-                    start = i + 1
-            joint.append(syl[start:-1])
-        for s in joint:
-            if count_vowels(s) >= 3:
-                i = 1
-                while len(s) - 2 < i:
-                    if s[i:i+2] in kokia_mgt:
-                        break
-                    if s[i:i+2] in istugoa_mgt:
-                        break
-                    if s[i] in mgt and s[i+1] in ktt:
-                        break
-                    i += 1
+    for s in syls:
+        if count_vowels(s) >= 3:
+            i = 1
+            while len(s) - 2 < i:
+                if s[i:i+2] in kokia_mgt:
+                    break
+                if s[i:i+2] in istugoa_mgt:
+                    break
+                if s[i] in mgt and s[i+1] in ktt:
+                    break
+                i += 1
+            head_c = s[0]
+            parts = (s[1:i], s[i:i+2], s[i+2:])
+            for part in parts:
+                if part != "":
+                    syls_.append(head_c + part)
+                    head_c = ""
+        elif count_vowels(s) == 2:
+            if s[0] in ktt:
                 head_c = s[0]
-                parts = (s[1:i], s[i:i+2], s[i+2:])
-                for part in parts:
-                    if part != "":
-                        syls_.append(head_c + part)
-                        head_c = ""
-            elif count_vowels(s) == 2:
-                head_c = s[0]
-                if s[-1] in ktt and s[1:3] not in kokia_mgt + istugoa_mgt:
-                    syls_.append(s[0:2])
-                    syls_.append(s[2:])
-                else:
-                    syls_.append(s)
             else:
-                syls_.append(s)
-    if encoded:
-        return syls_
-    else:
-        return [decode(s) for s in syls_]
+                head_c = ""
+            start = len(head_c)
+            if s[start:start+2] in istugoa_mgt + kokia_mgt:
+                syls_.append(head_c + s[start:])
+            else:
+                syls_.append(head_c + s[start:start+1])
+                syls_.append(s[start+1:])
+        else:
+            syls_.append(s)
+    return syls_
     
+def into_syllables(text):
+    text = text.lower()
+    text = encode(text)
+    text = text.split(",")
+    syls = []
+    for t in text:
+        syls += _into_syllables(t)
+    return syls
+
 def scan(text):
     syls = into_syllables(text)
     mark = ""
