@@ -8,10 +8,10 @@ istugoa_mgt = ["ai", "ui", "ei", "oi"]
 one_ktt = [
     "f", "p", "b", "m",
     "z","r", 
-    "t", "d", "s", "n",
+    "t", "d", "s", "j", "n",
     "k", "g",
     "v", "h",
-    "w", "r",
+    "w", "y",
 ]
 # 二文字の子音：扱いにくいので雑に置き換える
 two_ktt = [
@@ -26,7 +26,7 @@ def encode(text):
     text = text.\
         strip().\
         replace(".","").\
-        replace(",", ".").\
+        replace(",", "").\
         replace("'", "")
     for k in two_ktt:
         text = text.replace(k[0], k[1])
@@ -54,13 +54,25 @@ def count_vowels(text):
         if c in fecher_mgt:
             cnt += 1
     return cnt
+    
+def count_cons(text):
+    cnt = 0
+    for c in text:
+        if c in get_ktt():
+            cnt += 1
+    return cnt
 
 def decompose(syl):
+    cnt_cons = 0
+    while cnt_cons < len(syl):
+        if syl[cnt_cons] in fecher_mgt:
+            break
+        cnt_cons += 1
     cnt_vowel = count_vowels(syl)
-    if syl[0] in get_ktt():
-        head_c = syl[0]
-        vowel = syl[1:1+cnt_vowel]
-        if len(syl) > 1 + cnt_vowel:
+    if cnt_cons > 0:
+        head_c = syl[0:cnt_cons]
+        vowel = syl[cnt_cons:cnt_cons+cnt_vowel]
+        if len(syl) > cnt_cons + cnt_vowel:
             foot_c = syl[1+cnt_vowel:]
         else:
             foot_c = ""
@@ -84,20 +96,18 @@ def _into_syllables(text):
     ktt = get_ktt()
     loc = []
     ktt_count = 0
-    mgt_count = 0
     ktt_pre = True
     for i, ch in enumerate(text):
         if ch in mgt:
             if ktt_pre:
                 loc.append(i - int(ktt_count>0))
             ktt_pre = False
-            mgt_count += 1
             ktt_count = 0
         elif ch in ktt:
             ktt_pre = True
-            mgt_count = 0
             ktt_count += 1
     loc.append(len(text))
+    top_c = text[0:loc[0]]
     syls = []
     for i in range(len(loc) - 1):
         s, e = loc[i], loc[i+1]
@@ -126,8 +136,9 @@ def _into_syllables(text):
                 parts = (s[start:i], s[i:i+2], s[i+2:])
             for part in parts:
                 if part != "":
-                    syls_.append(head_c + part)
+                    syls_.append(top_c + head_c + part)
                     head_c = ""
+                    top_c = ""
         elif count_vowels(s) == 2:
             if s[0] in ktt:
                 head_c = s[0]
@@ -135,15 +146,17 @@ def _into_syllables(text):
                 head_c = ""
             start = len(head_c)
             if s[start:start+2] in istugoa_mgt + kokia_mgt:
-                syls_.append(head_c + s[start:])
+                syls_.append(top_c + head_c + s[start:])
             else:
                 if s[-1] in ktt:
-                    syls_.append(head_c + s[start:start+1])
+                    syls_.append(top_c + head_c + s[start:start+1])
                     syls_.append(s[start+1:])
                 else:
-                    syls_.append(head_c + s[start:])
+                    syls_.append(top_c + head_c + s[start:])
+            top_c = ""
         else:
-            syls_.append(s)
+            syls_.append(top_c + s)
+            top_c = ""
     return syls_
     
 def into_syllables(text):
