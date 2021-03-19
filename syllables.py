@@ -55,6 +55,24 @@ def count_vowels(text):
             cnt += 1
     return cnt
 
+def decompose(syl):
+    cnt_vowel = count_vowels(syl)
+    if syl[0] in get_ktt():
+        head_c = syl[0]
+        vowel = syl[1:1+cnt_vowel]
+        if len(syl) > 1 + cnt_vowel:
+            foot_c = syl[1+cnt_vowel:]
+        else:
+            foot_c = ""
+    else:
+        head_c = ""
+        vowel = syl[:cnt_vowel]
+        if len(syl) > cnt_vowel:
+            foot_c = syl[cnt_vowel:]
+        else:
+            foot_c = ""
+    return head_c, vowel, foot_c
+
 def get_ktt():
     ktt = one_ktt
     for k in two_ktt:
@@ -63,9 +81,7 @@ def get_ktt():
 
 def _into_syllables(text):
     mgt = fecher_mgt
-    ktt = one_ktt
-    for k in two_ktt:
-        ktt.append(k[1])
+    ktt = get_ktt()
     loc = []
     ktt_count = 0
     mgt_count = 0
@@ -136,9 +152,10 @@ def scan(text):
     syls = into_syllables(text)
     mark = ""
     for i in range(len(syls)):
-        if len(syls[i]) >= 3:
+        head_c, vowel, foot_c = decompose(syls[i])
+        if foot_c != "":
             mark += "-"
-        elif syls[i][-1] in get_ktt():
+        elif len(vowel) > 1:
             mark += "-"
         else:
             mark += "^"
